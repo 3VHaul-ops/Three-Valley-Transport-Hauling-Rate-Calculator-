@@ -56,47 +56,44 @@ function calculate() {
   const descDiv = document.getElementById('service-desc');
   const breakdownDiv = document.getElementById('fee-breakdown');
 
-  let baseFee = 0;
+  let serviceBase = 0;
   let perMile = 0;
   let desc = "";
-  let dispatchFee = 0;
+  let zoneSurcharge = 0;
   
-  // Clean Zone Pricing Logic
+  // Zone Travel Surcharges (Protects against empty truck miles)
   if (zone === '1') {
-    dispatchFee = 15;
+    zoneSurcharge = 0;
   } else if (zone === '2') {
-    dispatchFee = 25;
+    zoneSurcharge = 10;
   } else if (zone === '3') {
-    dispatchFee = 75;
+    zoneSurcharge = 60;
   }
 
+  // Service Base Fees & Mileage Rates
   if (service === 'local') {
-    perMile = 1.50;
+    serviceBase = 15; perMile = 1.50;
     desc = "Clean F-150 SuperCrew 4x4. Covered bed keeps gear dry.";
   } else if (service === 'heavy_light') {
-    perMile = 2.50;
+    serviceBase = 50; perMile = 2.50;
     desc = "Utility trailers & cargo under 4k lbs. No vehicle towing.";
   } else if (service === 'heavy_heavy') {
-    perMile = 2.50;
+    serviceBase = 75; perMile = 4.00; // Increased to $4.00 per mile
     desc = "Heavy trailering 4k to 8k lbs. No vehicle towing.";
   } else if (service === 'junk') {
-    perMile = 2.00;
+    serviceBase = 75; perMile = 2.00;
     desc = "Base dispatch & loading included. Muscle provided, not the wood.";
   }
 
   descDiv.innerText = desc;
   
   if (service !== "0") {
-    // Heavy Hauling and Junk base rates override the passenger dispatch fee structure if they are higher
-    let finalBase = dispatchFee;
-    if (service === 'heavy_light' && finalBase < 50) finalBase = 50;
-    if (service === 'heavy_heavy' && finalBase < 75) finalBase = 75;
-    if (service === 'junk' && finalBase < 75) finalBase = 75;
-
+    // Stacks the travel fee with the hook-up fee
+    const finalBase = serviceBase + zoneSurcharge;
     const total = finalBase + (perMile * miles);
     
     totalDiv.innerText = "Estimated Total: $" + total.toFixed(2);
-    breakdownDiv.innerText = "Zone Dispatch / Base Fee Applied: $" + finalBase.toFixed(2);
+    breakdownDiv.innerText = "Base/Hook-Up + Travel Fee Applied: $" + finalBase.toFixed(2);
   } else {
     totalDiv.innerText = "Estimated Total: $0.00";
     breakdownDiv.innerText = "";
