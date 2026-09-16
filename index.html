@@ -18,9 +18,16 @@
 
 <div class="container">
   <h2>Three Valleys Transport Estimator</h2>
-  <p style="text-align:center; font-size: 0.9em;">Dependable local link for the Mill Creek area.</p>
+  <p style="text-align:center; font-size: 0.9em;">Dependable transport for Huntingdon County & beyond.</p>
   
-  <label for="service">Select Service Type:</label>
+  <label for="zone">1. Select Pickup Location:</label>
+  <select id="zone" onchange="calculate()">
+    <option value="1">Zone 1: Local (0-10 miles from Mill Creek)</option>
+    <option value="2">Zone 2: Extended (11-25 miles from Mill Creek)</option>
+    <option value="3">Zone 3: State College / Distant (26+ miles)</option>
+  </select>
+
+  <label for="service">2. Select Service Type:</label>
   <select id="service" onchange="calculate()">
     <option value="0">-- Choose a Service --</option>
     <option value="local">Local Rides & Light Cargo</option>
@@ -30,42 +37,69 @@
   </select>
   <div id="service-desc" class="note"></div>
 
-  <label for="miles">Estimated Loaded Miles:</label>
-  <input type="number" id="miles" min="0" placeholder="Enter miles" oninput="calculate()">
+  <label for="miles">3. Estimated Loaded Miles (One-Way):</label>
+  <input type="number" id="miles" min="0" placeholder="Enter one-way miles" oninput="calculate()">
 
   <div class="result" id="total-cost">Estimated Total: $0.00</div>
-  <p class="note" style="text-align:center;">*This is an estimate. Junk removal dump fees are added at exact cost. Standby time is $20/hr.</p>
+  <div id="fee-breakdown" class="note" style="text-align:center; margin-top: 10px; font-weight: bold; color: #1a365d;"></div>
+  
+  <p class="note" style="text-align:center; margin-top: 15px;">*This is a one-way estimate. Standby time ($5/15 mins after first 10) and junk dump fees are not included.</p>
 </div>
 
 <script>
 function calculate() {
+  const zone = document.getElementById('zone').value;
   const service = document.getElementById('service').value;
   const miles = parseFloat(document.getElementById('miles').value) || 0;
+  
+  const totalDiv = document.getElementById('total-cost');
+  const descDiv = document.getElementById('service-desc');
+  const breakdownDiv = document.getElementById('fee-breakdown');
+
   let baseFee = 0;
   let perMile = 0;
   let desc = "";
-
-  if (service === 'local') {
-    baseFee = 15; perMile = 1.50;
-    desc = "Rides in a clean, blue 2013 Ford F-150 SuperCrew 4x4. Covered and carpeted bed keeps gear dry.";
-  } else if (service === 'heavy_light') {
-    baseFee = 50; perMile = 2.50;
-    desc = "Utility trailers & cargo under 4k lbs. No vehicle towing.";
-  } else if (service === 'heavy_heavy') {
-    baseFee = 75; perMile = 2.50;
-    desc = "Heavy trailering 4k to 8k lbs. No vehicle towing.";
-  } else if (service === 'junk') {
-    baseFee = 75; perMile = 2.00;
-    desc = "Base dispatch & loading fee included.";
+  let dispatchFee = 0;
+  
+  // Clean Zone Pricing Logic
+  if (zone === '1') {
+    dispatchFee = 15;
+  } else if (zone === '2') {
+    dispatchFee = 25;
+  } else if (zone === '3') {
+    dispatchFee = 75;
   }
 
-  document.getElementById('service-desc').innerText = desc;
+  if (service === 'local') {
+    perMile = 1.50;
+    desc = "Clean F-150 SuperCrew 4x4. Covered bed keeps gear dry.";
+  } else if (service === 'heavy_light') {
+    perMile = 2.50;
+    desc = "Utility trailers & cargo under 4k lbs. No vehicle towing.";
+  } else if (service === 'heavy_heavy') {
+    perMile = 2.50;
+    desc = "Heavy trailering 4k to 8k lbs. No vehicle towing.";
+  } else if (service === 'junk') {
+    perMile = 2.00;
+    desc = "Base dispatch & loading included. Muscle provided, not the wood.";
+  }
+
+  descDiv.innerText = desc;
   
   if (service !== "0") {
-    const total = baseFee + (perMile * miles);
-    document.getElementById('total-cost').innerText = "Estimated Total: $" + total.toFixed(2);
+    // Heavy Hauling and Junk base rates override the passenger dispatch fee structure if they are higher
+    let finalBase = dispatchFee;
+    if (service === 'heavy_light' && finalBase < 50) finalBase = 50;
+    if (service === 'heavy_heavy' && finalBase < 75) finalBase = 75;
+    if (service === 'junk' && finalBase < 75) finalBase = 75;
+
+    const total = finalBase + (perMile * miles);
+    
+    totalDiv.innerText = "Estimated Total: $" + total.toFixed(2);
+    breakdownDiv.innerText = "Zone Dispatch / Base Fee Applied: $" + finalBase.toFixed(2);
   } else {
-    document.getElementById('total-cost').innerText = "Estimated Total: $0.00";
+    totalDiv.innerText = "Estimated Total: $0.00";
+    breakdownDiv.innerText = "";
   }
 }
 </script>
