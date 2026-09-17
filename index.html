@@ -25,12 +25,11 @@
   <p style="text-align:center; font-size: 0.9em;">Dependable 4x4 local link for Raystown, Kishacoquillas, and Happy Valley.</p>
   
   <label for="zoneSelect">1. Select Pickup Location:</label>
-  <select id="zoneSelect">
-  <option value="1">Zone 1 (0-15 miles)</option>
-  <option value="2">Zone 2 (16-30 miles)</option>
-  <option value="3">Zone 3 (31+ miles)</option>
-</select>
-
+  <select id="zoneSelect" onchange="calculate()">
+    <option value="1">Zone 1 (0-15 miles)</option>
+    <option value="2">Zone 2 (16-30 miles)</option>
+    <option value="3">Zone 3 (31+ miles)</option>
+  </select>
 
   <label for="service">2. Select Service Type:</label>
   <select id="service" onchange="calculate()">
@@ -53,7 +52,8 @@
 
 <script>
 function calculate() {
-  const zone = document.getElementById('zone').value;
+  // FIXED: Changed 'zone' to 'zoneSelect' to match the HTML ID exactly
+  const zone = document.getElementById('zoneSelect').value;
   const service = document.getElementById('service').value;
   const miles = parseFloat(document.getElementById('miles').value) || 0;
   
