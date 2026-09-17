@@ -91,6 +91,17 @@ function calculate() {
     if (zone === '3') zoneBase = 105;
   }
 
+  // --- NEW LONG DISTANCE OVERRIDE START ---
+  if (miles >= 100) {
+    perMile = 3.00; 
+    
+    // Safety check: Keep heavy hauling at its required $4.00 rate
+    if (service === 'heavy_heavy') {
+      perMile = 4.00; 
+    }
+  }
+  // --- NEW LONG DISTANCE OVERRIDE END ---
+
   descDiv.innerText = desc;
   
   if (service !== "0") {
