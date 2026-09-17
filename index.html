@@ -7,7 +7,8 @@
 <style>
   body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; color: #333; }
   .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-top: 5px solid #1a365d; }
-  h2 { text-align: center; color: #1a365d; }
+  .logo { display: block; margin: 0 auto 15px auto; max-width: 130px; height: auto; }
+  h2 { text-align: center; color: #1a365d; margin-top: 0; }
   label { font-weight: bold; display: block; margin-top: 15px; }
   select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
   .note { font-size: 0.85em; color: #666; margin-top: 5px; font-style: italic; }
@@ -17,14 +18,17 @@
 <body>
 
 <div class="container">
+  <!-- This is where your badge goes -->
+  <img src="badge.png" alt="Three Valleys Transport Badge" class="logo">
+  
   <h2>Three Valleys Transport Estimator</h2>
-  <p style="text-align:center; font-size: 0.9em;">Dependable transport for Huntingdon County & beyond.</p>
+  <p style="text-align:center; font-size: 0.9em;">Dependable 4x4 local link for Raystown, Kishacoquillas, and Happy Valley.</p>
   
   <label for="zone">1. Select Pickup Location:</label>
   <select id="zone" onchange="calculate()">
-    <option value="1">Zone 1: Local (0-10 miles from Mill Creek)</option>
-    <option value="2">Zone 2: Extended (11-25 miles from Mill Creek)</option>
-    <option value="3">Zone 3: State College / Distant (26+ miles)</option>
+    <option value="1">Zone 1</option>
+    <option value="2">Zone 2</option>
+    <option value="3">Zone 3</option>
   </select>
 
   <label for="service">2. Select Service Type:</label>
@@ -43,7 +47,7 @@
   <div class="result" id="total-cost">Estimated Total: $0.00</div>
   <div id="fee-breakdown" class="note" style="text-align:center; margin-top: 10px; font-weight: bold; color: #1a365d;"></div>
   
-  <p class="note" style="text-align:center; margin-top: 15px;">*This is a one-way estimate. Standby time ($5/15 mins after first 10) and junk dump fees are not included.</p>
+  <p class="note" style="text-align:center; margin-top: 15px;">*This is a one-way estimate. Standby time ($5.00/15 mins after first 10) and local dump fees ($30 up to 600 lbs) are not included.</p>
 </div>
 
 <script>
@@ -56,44 +60,44 @@ function calculate() {
   const descDiv = document.getElementById('service-desc');
   const breakdownDiv = document.getElementById('fee-breakdown');
 
-  let serviceBase = 0;
+  let zoneBase = 0;
   let perMile = 0;
   let desc = "";
-  let zoneSurcharge = 0;
-  
-  // Zone Travel Surcharges (Protects against empty truck miles)
-  if (zone === '1') {
-    zoneSurcharge = 0;
-  } else if (zone === '2') {
-    zoneSurcharge = 10;
-  } else if (zone === '3') {
-    zoneSurcharge = 60;
-  }
 
-  // Service Base Fees & Mileage Rates
+  // Flyer Match Logic
   if (service === 'local') {
-    serviceBase = 15; perMile = 1.50;
-    desc = "Clean F-150 SuperCrew 4x4. Covered bed keeps gear dry.";
+    perMile = 1.50;
+    desc = "Clean F-150 SuperCrew (seats up to 4 + gear). Covered bed keeps gear completely dry.";
+    if (zone === '1') zoneBase = 15;
+    if (zone === '2') zoneBase = 25;
+    if (zone === '3') zoneBase = 35;
   } else if (service === 'heavy_light') {
-    serviceBase = 50; perMile = 2.50;
-    desc = "Utility trailers & cargo under 4k lbs. No vehicle towing.";
+    perMile = 2.50;
+    desc = "Perfect for utility trailers, cargo, and move-out goods. No vehicle towing.";
+    if (zone === '1') zoneBase = 50;
+    if (zone === '2') zoneBase = 80;
+    if (zone === '3') zoneBase = 110;
   } else if (service === 'heavy_heavy') {
-    serviceBase = 75; perMile = 4.00; // Increased to $4.00 per mile
-    desc = "Heavy trailering 4k to 8k lbs. No vehicle towing.";
+    perMile = 4.00;
+    desc = "Heavy-duty hauling for larger loads and equipment. No vehicle towing.";
+    if (zone === '1') zoneBase = 75;
+    if (zone === '2') zoneBase = 95;
+    if (zone === '3') zoneBase = 135;
   } else if (service === 'junk') {
-    serviceBase = 75; perMile = 2.00;
-    desc = "Base dispatch & loading included. Muscle provided, not the wood.";
+    perMile = 1.50;
+    desc = "Muscle & labor fully included. Local dump fees passed directly to you with zero markups.";
+    if (zone === '1') zoneBase = 75;
+    if (zone === '2') zoneBase = 85;
+    if (zone === '3') zoneBase = 105;
   }
 
   descDiv.innerText = desc;
   
   if (service !== "0") {
-    // Stacks the travel fee with the hook-up fee
-    const finalBase = serviceBase + zoneSurcharge;
-    const total = finalBase + (perMile * miles);
+    const total = zoneBase + (perMile * miles);
     
     totalDiv.innerText = "Estimated Total: $" + total.toFixed(2);
-    breakdownDiv.innerText = "Base/Hook-Up + Travel Fee Applied: $" + finalBase.toFixed(2);
+    breakdownDiv.innerText = "Zone Base Fee Applied: $" + zoneBase.toFixed(2);
   } else {
     totalDiv.innerText = "Estimated Total: $0.00";
     breakdownDiv.innerText = "";
