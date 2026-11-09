@@ -12,17 +12,24 @@
   label { font-weight: bold; display: block; margin-top: 15px; }
   select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
   .note { font-size: 0.85em; color: #666; margin-top: 5px; font-style: italic; }
+  .instructions { background: #e2e8f0; padding: 12px; border-radius: 4px; font-size: 0.9em; margin: 15px 0; text-align: center; color: #1a365d; border: 1px solid #cbd5e1; }
   .result { margin-top: 20px; padding: 15px; background: #e2e8f0; text-align: center; font-size: 1.2em; font-weight: bold; border-radius: 4px; }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- This is where your badge goes -->
   <img src="https://i.postimg.cc/9fHzG2L7/three-valleys-burnham-transparent.png" alt="Three Valleys Transport Badge" class="logo">
-
+  
   <h2>Three Valleys Transport Estimator</h2>
   <p style="text-align:center; font-size: 0.9em;">Dependable 4x4 local link for Raystown, Kishacoquillas, and Happy Valley.</p>
+  
+  <div class="instructions">
+    <strong>How to get your estimate:</strong><br>
+    1. Select your pickup location.<br>
+    2. Choose your service type.<br>
+    3. Enter your one-way mileage.
+  </div>
   
   <label for="zoneSelect">1. Select Pickup Location:</label>
   <select id="zoneSelect" onchange="calculate()">
@@ -47,12 +54,14 @@
   <div class="result" id="total-cost">Estimated Total: $0.00</div>
   <div id="fee-breakdown" class="note" style="text-align:center; margin-top: 10px; font-weight: bold; color: #1a365d;"></div>
   
-  <p class="note" style="text-align:center; margin-top: 15px;">*This is a one-way estimate. Standby time ($5.00/15 mins after first 10) and local dump fees ($30 up to 600 lbs) are not included.</p>
+  <p class="note" style="text-align:center; margin-top: 20px;">
+    *This is a one-way estimate. Standby time ($5.00/15 mins after first 10) and local dump fees ($30 up to 600 lbs) are not included.<br><br>
+    <strong style="color: #1a365d; font-size: 1.1em;">Payment is due upon delivery.</strong>
+  </p>
 </div>
 
 <script>
 function calculate() {
-  // FIXED: Changed 'zone' to 'zoneSelect' to match the HTML ID exactly
   const zone = document.getElementById('zoneSelect').value;
   const service = document.getElementById('service').value;
   const miles = parseFloat(document.getElementById('miles').value) || 0;
@@ -65,7 +74,6 @@ function calculate() {
   let perMile = 0;
   let desc = "";
 
-  // Flyer Match Logic
   if (service === 'local') {
     perMile = 1.50;
     desc = "Clean F-150 SuperCrew (seats up to 4 + gear). Covered bed keeps gear completely dry.";
@@ -92,16 +100,14 @@ function calculate() {
     if (zone === '3') zoneBase = 105;
   }
 
-  // --- NEW LONG DISTANCE OVERRIDE START ---
   if (miles >= 100) {
     perMile = 3.00; 
+    zoneBase = 0; 
     
-    // Safety check: Keep heavy hauling at its required $4.00 rate
     if (service === 'heavy_heavy') {
       perMile = 4.00; 
     }
   }
-  // --- NEW LONG DISTANCE OVERRIDE END ---
 
   descDiv.innerText = desc;
   
@@ -109,7 +115,12 @@ function calculate() {
     const total = zoneBase + (perMile * miles);
     
     totalDiv.innerText = "Estimated Total: $" + total.toFixed(2);
-    breakdownDiv.innerText = "Zone Base Fee Applied: $" + zoneBase.toFixed(2);
+    
+    if (miles >= 100) {
+        breakdownDiv.innerText = "Long Distance Rate Applied ($" + perMile.toFixed(2) + "/mile)";
+    } else {
+        breakdownDiv.innerText = "Zone Base Fee Applied: $" + zoneBase.toFixed(2);
+    }
   } else {
     totalDiv.innerText = "Estimated Total: $0.00";
     breakdownDiv.innerText = "";
